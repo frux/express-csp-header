@@ -90,25 +90,6 @@ describe('tld', () => {
 			.toStrictEqual('script-src myhost.com;');
 	});
 
-	test('should pass domainOptions to parse-domain', () => {
-		const { res } = execMiddleware(
-			{
-				directives: {
-					'script-src': ['myhost.' + TLD]
-				},
-				domainOptions: {
-					customTlds: ['my-custom-tld.com']
-				}
-			},
-			{
-				hostname: 'example.my-custom-tld.com'
-			}
-		);
-
-		expect(res.headers['Content-Security-Policy'])
-			.toStrictEqual('script-src myhost.my-custom-tld.com;');
-	});
-
 	test('should ignore %tld% if req.tld is undefined', () => {
 		const { res } = execMiddleware(
 			{

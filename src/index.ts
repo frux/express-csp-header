@@ -2,7 +2,7 @@ import crypto from 'crypto';
 
 import { getCSP, CSPHeaderParams, nonce } from 'csp-header';
 import { RequestHandler, Request, Response } from 'express';
-import parseDomain, { ParseOptions } from 'parse-domain';
+import { parseDomain, ParseResultType } from 'parse-domain';
 
 import { NONCE, TLD } from './constants';
 
@@ -11,7 +11,6 @@ export * from './constants';
 type ReportUriFunction = (req: Request, res: Response) => string;
 
 export interface ExpressCSPParams extends Omit<CSPHeaderParams, 'reportUri'> {
-    domainOptions?: ParseOptions,
     reportOnly?: boolean,
     reportUri?: string | ReportUriFunction,
 }
@@ -23,10 +22,9 @@ export function expressCspHeader(params?: ExpressCSPParams): RequestHandler {
             return;
         }
 
-        let { domainOptions } = params;
         let cspString = getCspString(req, res, params);
         cspString = applyNonce(req, cspString);
-        cspString = applyAutoTld(req, cspString, domainOptions);
+        cspString = applyAutoTld(req, cspString);
 
         setHeader(res, cspString, params);
 
@@ -41,7 +39,7 @@ function getCspString(req: Request, res: Response, params: ExpressCSPParams): st
         presets,
         reportUri: typeof reportUri === 'function' ? reportUri(req, res) : reportUri
     };
-    
+
     return getCSP(cspHeaderParams);
 }
 
@@ -55,15 +53,20 @@ function applyNonce(req: Request, cspString: string): string {
     return cspString;
 }
 
-function applyAutoTld(req: Request, cspString: string, domainOptions?: ParseOptions): string {
+function applyAutoTld(req: Request, cspString: string): string {
     if (cspString.includes(TLD)) {
-        let domain = parseDomain(req.hostname, domainOptions);
+        let result = parseDomain(req.hostname);
+        if (ParseResultType.Listed !== result.type) {
+			return cspString;
+		}
 
-        if (!domain || !domain.tld) {
+        if (0 === result.topLevelDomains.length) {
             return cspString;
         }
 
-        return cspString.replace(new RegExp(TLD, 'g'), domain.tld);
+        const tld = result.topLevelDomains.join('.');
+
+        return cspString.replace(new RegExp(TLD, 'g'), tld);
     }
 
     return cspString;

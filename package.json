@@ -37,6 +37,6 @@
   },
   "dependencies": {
     "csp-header": "^2.1.1",
-    "parse-domain": "^2.3.4"
+    "parse-domain": "^3.0.1"
   }
 }
