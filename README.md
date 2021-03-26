@@ -3,6 +3,8 @@
 [![NPM downloads](https://img.shields.io/npm/dm/express-csp-header.svg?style=flat)](https://www.npmjs.com/package/express-csp-header)
 [![Dependency Status](https://img.shields.io/david/frux/express-csp-header.svg?style=flat)](https://david-dm.org/frux/express-csp-header)
 
+## ⚠️ ARCHIVED: Repository became a part of monorepo [frux/csp](https://github.com/frux/csp) ⚠️
+
 ## Usage
 
 ```js
